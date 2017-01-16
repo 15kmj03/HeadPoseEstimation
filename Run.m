@@ -29,8 +29,13 @@ videoFileReader=vision.VideoFileReader('D:1226\30deg\kameyama\3.mp4',...
     'VideoOutputDataType', 'uint8');
 
 % ステレオパラメーター読み込み
-% ステレオパラメータはL1R2のみ
 load('stereoParamsL1R2.mat')
+load('stereoParamsR1L2.mat')
+
+% stereoParamsR1L2の初期化
+A=nan(768,1024);
+B=nan(768,1024);
+rectifyStereoImages(A, B, stereoParamsR1L2, 'OutputView', 'valid');
     
 % 検出器読み込み
 % 検索対象の大きさをの上限、下限を設定
@@ -78,7 +83,11 @@ dispMap = disparityBbox(grayL, grayR, bbox, minDisparity, camera);
 % L1R2のステレオパラメータで3次元計算
 % bbox領域内のみで切り出す
 % 最終的な戻り値の大きさはbboxの大きさと等しい
+if camera==1
 xyzPoints = reconstructScene(dispMap, stereoParamsL1R2);
+else
+    xyzPoints = reconstructScene(dispMap, stereoParamsR1L2);
+end
 xyzPoints=bbox2ROI(xyzPoints,bbox);
 
 % 3次元座標を左カメラ基準に変更

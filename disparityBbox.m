@@ -21,7 +21,7 @@ function [ disparityMap ] = disparityBbox( grayL, grayR, bbox, minDisparity, cam
 %%
 scale=0.5;
 
-disparityMap=ones(size(grayL))*-realmax('single');
+
 
 x=bbox(1);  % x
 y=bbox(2);  % y
@@ -32,6 +32,7 @@ bm = cv.StereoSGBM('BlockSize',5,'P1',100,'P2',1600,'UniquenessRatio',1);
 
 switch camera
     case 1
+        disparityMap=ones(size(grayL))*-realmax('single');
         ROIL=grayL(y:y+h,1:x+w);
         ROIR=grayR(y:y+h,1:x+w);
         roiSize=size(ROIL);
@@ -49,20 +50,21 @@ switch camera
         disparityMap(y:y+h,x:x+w)=dispMapROI(:,x:x+w);
         
     case 2
+        disparityMap=ones(size(grayL))*realmax('single');
         ROIL=grayL(y:y+h,x:end);
         ROIR=grayR(y:y+h,x:end);
         roiSize=size(ROIL);
         
-        ROIL=imresize(ROIL,'scale',[scale,1]);
-        ROIR=imresize(ROIR,'scale',[scale,1]);
+%         ROIL=imresize(ROIL,'scale',[scale,1]);
+%         ROIR=imresize(ROIR,'scale',[scale,1]);
         
         bm.MinDisparity=-(minDisparity+64);
         dispMapROI=bm.compute(ROIR, ROIL);
         dispMapROI=single(dispMapROI)/16;
 
         
-        dispMapROI=imresize(dispMapROI,roiSize);
-        dispMapROI=medfilt2(dispMapROI);
+%         dispMapROI=imresize(dispMapROI,roiSize);
+%         dispMapROI=medfilt2(dispMapROI);
         
         disparityMap(y:y+h,x:x+w)=dispMapROI(:,1:1+w);
     otherwise
