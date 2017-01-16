@@ -81,6 +81,11 @@ dispMap = disparityBbox(grayL, grayR, bbox, minDisparity, camera);
 xyzPoints = reconstructScene(dispMap, stereoParamsL1R2);
 xyzPoints=bbox2ROI(xyzPoints,bbox);
 
+% 3次元座標を左カメラ基準に変更
+if camera==2
+    xyzPoints=relocate(xyzPoints,stereoParamsL1R2);
+end
+
 % 顔と背景の分離
 % 	点群をn分割
 % 	z座標をkmeansで2分割
@@ -164,7 +169,9 @@ xyzPoints = reconstructScene(dispMap, stereoParamsL1R2);
 xyzPoints=bbox2ROI(xyzPoints,bbox);
 
 %% 3次元座標を左カメラ基準に変更
-xyzPoints=relocate(xyzPoints,stereoParamsL1R2,camera);
+if camera==2
+    xyzPoints=relocate(xyzPoints,stereoParamsL1R2);
+end
 
 %% 顔と背景の分離
 % 	点群をn分割
