@@ -25,7 +25,7 @@ yaws=zeros(301,1);
 rollss=zeros(301,1);
 
 % 動画読み込み
-videoFileReader=vision.VideoFileReader('D:1226\30deg\takumi\1.mp4',...
+videoFileReader=vision.VideoFileReader('F:\tutiya\2.avi',...
     'VideoOutputDataType', 'uint8');
 
 % ステレオパラメーター読み込み
@@ -113,7 +113,7 @@ prevBbox(2)=prevBbox(2)-ROI(2)-1;
 
 %% ループ
 while 1
-    tic
+%     tic
     
     %% 1フレーム読み込み
     [rawStereoImg, EOF] = step(videoFileReader);
@@ -164,23 +164,16 @@ while 1
         xyzPoints=relocate(xyzPoints,stereoParamsL1R2);
     end
     
-        ptCloud=pointCloud(xyzPoints);
-    figure(1);
-    pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-    title('ptCloud');
-    drawnow
-    
-%% 顔と背景の分離
-xyzPoints=refineXyzPoints(xyzPoints);
-    
-    
+    %% 顔と背景の分離
+    xyzPoints=refineXyzPoints(xyzPoints);
+        
     %% ptCloudの作成
     % 	ヨーが0度のときのptCloudをface0として保存
     ptCloud=pointCloud(xyzPoints);
-    figure(99);
-    pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-    title('ptCloud');
-    drawnow
+        figure(99);
+        pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+        title('ptCloud');
+        drawnow
     
     %% EOFの確認
     if EOF
@@ -192,5 +185,5 @@ xyzPoints=refineXyzPoints(xyzPoints);
     prevBbox=bbox;
     
     %%
-    toc
+%     toc
 end

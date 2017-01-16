@@ -2,29 +2,65 @@ function [ xyzPoints ] = refineXyzPoints( xyzPoints )
 %REFINEXYZPOINTS この関数の概要をここに記述
 %   詳細説明をここに記述
 
-n=9;
+n=10;
 
 %% xyzPointsをn等分
 nxyz=separateXyzPoints(xyzPoints,n);
 
+%% ノイズ除去
+for i=1:n
+    xval=nxyz{i}(:,1);
+    yval=nxyz{i}(:,2);
+    zval=nxyz{i}(:,3);
+    
+    th1=min(xval)+(max(xval)-min(xval))*1/3;
+    th2=min(xval)+(max(xval)-min(xval))*2/3;
+    
+    xval1=xval(xval<th1);
+    yval1=yval(xval<th1);
+    zval1=zval(xval<th1);
+    
+    xval2=xval(th1<=xval & xval<=th2);
+    yval2=yval(th1<=xval & xval<=th2);
+    zval2=zval(th1<=xval & xval<=th2);
+    
+    xval3=xval(th2<xval);
+    yval3=yval(th2<xval);
+    zval3=zval(th2<xval);
+    
+    zstd1=std(zval1);
+    zstd2=std(zval2);
+    zstd3=std(zval3);
+    zmean1=mean(zval1);
+    zmean2=mean(zval2);
+    zmean3=mean(zval3);
+    
+    newxval=[xval1(abs(zval1-zmean1)<zstd1*2);
+        xval2(abs(zval2-zmean2)<zstd2*2);
+        xval3(abs(zval3-zmean3)<zstd3*2)];
+    newyval=[yval1(abs(zval1-zmean1)<zstd1*2);
+        yval2(abs(zval2-zmean2)<zstd2*2);
+        yval3(abs(zval3-zmean3)<zstd3*2)];
+    newzval=[zval1(abs(zval1-zmean1)<zstd1*2);
+        zval2(abs(zval2-zmean2)<zstd2*2);
+        zval3(abs(zval3-zmean3)<zstd3*2)];
+    
+    nxyz{i}=[newxval,newyval,newzval];
+end
+
 %% 最急降下法でthを決定
 for i=1:n
-    xval=nxyz{i}(:,:,1);
-    yval=nxyz{i}(:,:,2);
-    zval=nxyz{i}(:,:,3);
-        
-    temp=[xval(:),yval(:),zval(:)];
-    temp=sortrows(temp);
+
     
-    xval=temp(:,1);
-    yval=temp(:,2);
-    zval=temp(:,3);
+    xval=nxyz{i}(:,1);
+    yval=nxyz{i}(:,2);
+    zval=nxyz{i}(:,3);
     
     %     figure(i)
-    %     plot(xval,zval,'o')
-    %     grid on
+%         plot(xval,zval,'o')
+%         grid on
     
-    [idx,classCenter] = kmeans(zval,2);
+    [~,classCenter] = kmeans(zval,2);
     classCenter=sort(classCenter);
     
     centerX=mean([min(xval),max(xval)]);
@@ -64,7 +100,7 @@ for i=1:n
         if isnan(thA)
         end
     end
-    thA
+%     thA
     
     % B
     M=ones(numel(zvalB),1)*classCenter(1);
@@ -87,22 +123,22 @@ for i=1:n
         if isnan(thB)
         end
     end
-    thB
-    xval=[xvalA(zvalA<centerZ&xvalA>thA);xvalB(zvalB<centerZ&xvalB<thB)];
-    yval=[yvalA(zvalA<centerZ&xvalA>thA);yvalB(zvalB<centerZ&xvalB<thB)];
-    zval=[zvalA(zvalA<centerZ&xvalA>thA);zvalB(zvalB<centerZ&xvalB<thB)];
+%     thB
+    newxval=[xvalA(zvalA<centerZ&xvalA>thA);xvalB(zvalB<centerZ&xvalB<thB)];
+    newyval=[yvalA(zvalA<centerZ&xvalA>thA);yvalB(zvalB<centerZ&xvalB<thB)];
+    newzval=[zvalA(zvalA<centerZ&xvalA>thA);zvalB(zvalB<centerZ&xvalB<thB)];
     
-    nxyz{i}=[xval,yval,zval];
+    nxyz{i}=[newxval,newyval,newzval];
     
-    ptCloud=pointCloud(nxyz{i});
-    figure(9);
-    pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-    title('ptCloud');
+%     ptCloud=pointCloud(nxyz{i});
+%     figure(9);
+%     pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+%     title('ptCloud');
     
 end
 
 %% 合成
-xyzPoints=[nxyz{1};nxyz{2};nxyz{3};nxyz{4};nxyz{5};nxyz{6};nxyz{7};nxyz{8};nxyz{9}];
+xyzPoints=[nxyz{1};nxyz{2};nxyz{3};nxyz{4};nxyz{5};nxyz{6};nxyz{7};nxyz{8};nxyz{9};nxyz{10}];
 
 end
 
