@@ -25,7 +25,7 @@ yaws=zeros(301,1);
 rollss=zeros(301,1);
 
 % ìÆâÊì«Ç›çûÇ›
-videoFileReader=vision.VideoFileReader('D:1226\30deg\kameyama\3.mp4',...
+videoFileReader=vision.VideoFileReader('D:1226\30deg\arai\1.mp4',...
     'VideoOutputDataType', 'uint8');
 
 % ÉXÉeÉåÉIÉpÉâÉÅÅ[É^Å[ì«Ç›çûÇ›
@@ -85,109 +85,8 @@ if camera==2
     xyzPoints=relocate(xyzPoints,stereoParamsL1R2);
 end
 
-%% äÁÇ∆îwåiÇÃï™ó£
-% xyzPointsÇnìôï™
-n=3;
-yy=zeros(1,n*2);
-h=floor((bbox(4)+1)/n)-1;
-yy(1)=1;
-
-for i=2:n*2
-    if rem(i,2)
-        yy(i)=yy(i-1)+1;
-    else
-        yy(i)=yy(i-1)+h;
-    end
-end
-
-xyz=cell(n,1);
-for i=1:n
-    xyz{i}=xyzPoints(yy(i*2-1):yy(i*2),:,:);
-end
-
-% ç≈ã}ç~â∫ñ@Ç≈thÇåàíË
-for i=1:n
-    xval=xyz{i}(:,:,1);
-    yval=xyz{i}(:,:,2);
-    zval=xyz{i}(:,:,3);
-    
-    xval=xval(:);
-    yval=yval(:);
-    zval=zval(:);
-    
-%     figure(i)
-%     plot(xval,zval,'o')
-%     grid on
-    
-    [idx,classCenter] = kmeans(zval,2);
-    classCenter=sort(classCenter);
-    
-    centerX=mean([min(xval),max(xval)]);
-    centerZ=mean(classCenter);
-    
-    xvalA=xval(xval<=centerX);
-    yvalA=yval(xval<=centerX);
-    zvalA=zval(xval<=centerX);
-    
-    xvalB=xval(xval>centerX);
-    yvalB=yval(xval>centerX);
-    zvalB=zval(xval>centerX);
-    
-    thA=mean(xvalA(centerZ-1<zvalA & zvalA<centerZ+1));
-    thB=mean(xvalB(centerZ-1<zvalB & zvalB<centerZ+1));
-    
-    
-    % A
-    M=ones(numel(zvalA),1)*classCenter(1);
-    M2=M;
-    for j=1:100
-        M(xvalA<=thA)=classCenter(2);
-        M(xvalA>thA)=classCenter(1);
-        M2(xvalA<=thA+1)=classCenter(2);
-        M2(xvalA>thA+1)=classCenter(1);
-        
-        fx=sum(abs(M-zvalA));
-        fx2=sum(abs(M2-zvalA));
-        grad=fx2-fx;
-        stepWidth=-0.0001*grad;
-        if abs(stepWidth)<0.1
-            break
-        end
-        thB2=thA+stepWidth;
-        thA=thB2;
-    end
-    
-    % B
-    M=ones(numel(zvalB),1)*classCenter(1);
-    M2=M;
-    for j=1:100
-        M(xvalB<=thB)=classCenter(1);
-        M(xvalB>thB)=classCenter(2);
-        M2(xvalB<=thB+1)=classCenter(1);
-        M2(xvalB>thB+1)=classCenter(2);
-        
-        fx=sum(abs(M-zvalB));
-        fx2=sum(abs(M2-zvalB));
-        grad=fx2-fx;
-        stepWidth=-0.0001*grad;
-        if abs(stepWidth)<0.1
-            break
-        end
-        thB2=thB+stepWidth;
-        thB=thB2;
-    end
-    
-    xval=[xvalA(zvalA<centerZ&xvalA>thA);xvalB(zvalB<centerZ&xvalB<thB)];
-    yval=[yvalA(zvalA<centerZ&xvalA>thA);yvalB(zvalB<centerZ&xvalB<thB)];
-    zval=[zvalA(zvalA<centerZ&xvalA>thA);zvalB(zvalB<centerZ&xvalB<thB)];
-    
-    xyz{i}=[xval,yval,zval];
-    
-end
-
-% çáê¨
-xyzPoints=[xyz{1};xyz{2};xyz{3}];
-
+% äÁÇ∆îwåiÇÃï™ó£
+xyzPoints=refineXyzPoints(xyzPoints);
 
 % ptCloudÇÃçÏê¨
 % 	ÉàÅ[Ç™0ìxÇÃÇ∆Ç´ÇÃptCloudÇface0Ç∆ÇµÇƒï€ë∂
@@ -272,108 +171,7 @@ while 1
     drawnow
     
 %% äÁÇ∆îwåiÇÃï™ó£
-% xyzPointsÇnìôï™
-n=3;
-yy=zeros(1,n*2);
-h=floor((bbox(4)+1)/n)-1;
-yy(1)=1;
-
-for i=2:n*2
-    if rem(i,2)
-        yy(i)=yy(i-1)+1;
-    else
-        yy(i)=yy(i-1)+h;
-    end
-end
-
-xyz=cell(n,1);
-for i=1:n
-    xyz{i}=xyzPoints(yy(i*2-1):yy(i*2),:,:);
-end
-
-% ç≈ã}ç~â∫ñ@Ç≈thÇåàíË
-for i=1:n
-    xval=xyz{i}(:,:,1);
-    yval=xyz{i}(:,:,2);
-    zval=xyz{i}(:,:,3);
-    
-    xval=xval(:);
-    yval=yval(:);
-    zval=zval(:);
-    
-%     figure(i)
-%     plot(xval,zval,'o')
-%     grid on
-    
-    [idx,classCenter] = kmeans(zval,2);
-    classCenter=sort(classCenter);
-    
-    centerX=mean([min(xval),max(xval)]);
-    centerZ=mean(classCenter);
-    
-    xvalA=xval(xval<=centerX);
-    yvalA=yval(xval<=centerX);
-    zvalA=zval(xval<=centerX);
-    
-    xvalB=xval(xval>centerX);
-    yvalB=yval(xval>centerX);
-    zvalB=zval(xval>centerX);
-    
-    thA=mean(xvalA(centerZ-1<zvalA & zvalA<centerZ+1));
-    thB=mean(xvalB(centerZ-1<zvalB & zvalB<centerZ+1));
-    
-    
-    % A
-    M=ones(numel(zvalA),1)*classCenter(1);
-    M2=M;
-    for j=1:100
-        M(xvalA<=thA)=classCenter(2);
-        M(xvalA>thA)=classCenter(1);
-        M2(xvalA<=thA+1)=classCenter(2);
-        M2(xvalA>thA+1)=classCenter(1);
-        
-        fx=sum(abs(M-zvalA));
-        fx2=sum(abs(M2-zvalA));
-        grad=fx2-fx;
-        stepWidth=-0.0001*grad;
-        if abs(stepWidth)<0.1
-            break
-        end
-        thB2=thA+stepWidth;
-        thA=thB2;
-    end
-    thA
-    
-    % B
-    M=ones(numel(zvalB),1)*classCenter(1);
-    M2=M;
-    for j=1:100
-        M(xvalB<=thB)=classCenter(1);
-        M(xvalB>thB)=classCenter(2);
-        M2(xvalB<=thB+1)=classCenter(1);
-        M2(xvalB>thB+1)=classCenter(2);
-        
-        fx=sum(abs(M-zvalB));
-        fx2=sum(abs(M2-zvalB));
-        grad=fx2-fx;
-        stepWidth=-0.0001*grad;
-        if abs(stepWidth)<0.1
-            break
-        end
-        thB2=thB+stepWidth;
-        thB=thB2;
-    end
-    thB
-    xval=[xvalA(zvalA<centerZ&xvalA>thA);xvalB(zvalB<centerZ&xvalB<thB)];
-    yval=[yvalA(zvalA<centerZ&xvalA>thA);yvalB(zvalB<centerZ&xvalB<thB)];
-    zval=[zvalA(zvalA<centerZ&xvalA>thA);zvalB(zvalB<centerZ&xvalB<thB)];
-    
-    xyz{i}=[xval,yval,zval];
-    
-end
-
-% çáê¨
-xyzPoints=[xyz{1};xyz{2};xyz{3}];
+xyzPoints=refineXyzPoints(xyzPoints);
     
     
     %% ptCloudÇÃçÏê¨
