@@ -19,7 +19,7 @@ function [ disparityMap ] = disparityBbox( grayL, grayR, bbox, minDisparity, cam
 
 
 %%
-scale=0.5;
+% scale=0.5;
 
 
 
@@ -29,31 +29,31 @@ w=bbox(3);  % width
 h=bbox(4);  % height
 
 bm = cv.StereoSGBM('BlockSize',5,'P1',100,'P2',1600,'UniquenessRatio',1);
-
+        disparityMap=ones(size(grayL))*-realmax('single');
+        
 switch camera
     case 1
         disparityMap=ones(size(grayL))*-realmax('single');
         ROIL=grayL(y:y+h,1:x+w);
         ROIR=grayR(y:y+h,1:x+w);
-        roiSize=size(ROIL);
+%         roiSize=size(ROIL);
         
-        ROIL=imresize(ROIL,'scale',[scale,1]);
-        ROIR=imresize(ROIR,'scale',[scale,1]);
+%         ROIL=imresize(ROIL,'scale',[scale,1]);
+%         ROIR=imresize(ROIR,'scale',[scale,1]);
         
         bm.MinDisparity=minDisparity;
         dispMapROI=bm.compute(ROIL, ROIR);
         dispMapROI=single(dispMapROI)/16;
         
-        dispMapROI=imresize(dispMapROI,roiSize);
-        dispMapROI=medfilt2(dispMapROI);
+%         dispMapROI=imresize(dispMapROI,roiSize);
+%         dispMapROI=medfilt2(dispMapROI);
                 
         disparityMap(y:y+h,x:x+w)=dispMapROI(:,x:x+w);
         
     case 2
-        disparityMap=ones(size(grayL))*realmax('single');
         ROIL=grayL(y:y+h,x:end);
         ROIR=grayR(y:y+h,x:end);
-        roiSize=size(ROIL);
+%         roiSize=size(ROIL);
         
 %         ROIL=imresize(ROIL,'scale',[scale,1]);
 %         ROIR=imresize(ROIR,'scale',[scale,1]);
@@ -62,9 +62,9 @@ switch camera
         dispMapROI=bm.compute(ROIR, ROIL);
         dispMapROI=single(dispMapROI)/16;
 
-        
+        dispMapROI(dispMapROI>max(dispMapROI(:))-32)=-realmax('single');
 %         dispMapROI=imresize(dispMapROI,roiSize);
-%         dispMapROI=medfilt2(dispMapROI);
+%         dispMapROI=medfilt2(dispMapROI,[5,5]);
         
         disparityMap(y:y+h,x:x+w)=dispMapROI(:,1:1+w);
     otherwise
@@ -73,5 +73,5 @@ end
 
 % figure
 % imshow(disparityMap,[minDisparity,minDisparity+64],'ColorMap',jet)
-
+% imshow(disparityMap,[-minDisparity-64,-minDisparity],'ColorMap',jet)
 end
