@@ -29,9 +29,8 @@ videoFileReader=vision.VideoFileReader('D:1226\30deg\kameyama\3.mp4',...
     'VideoOutputDataType', 'uint8');
 
 % ステレオパラメーター読み込み
-% ステレオパラメータはL1R2のみ
 load('stereoParamsL1R2.mat')
-    
+
 % 検出器読み込み
 % 検索対象の大きさをの上限、下限を設定
 faceDetector = vision.CascadeObjectDetector('ClassificationModel',...
@@ -105,7 +104,7 @@ drawnow
 % prevの設定
 prevCamera=camera;
 prevBbox=bbox;
-    
+
 % ROIの設定、ステレオパラメータの辻褄を合わせる
 switch camera
     case 1
@@ -126,78 +125,78 @@ prevBbox(2)=prevBbox(2)-ROI(2)-1;
 while 1
     tic
     
-%% 1フレーム読み込み    
-[rawStereoImg, EOF] = step(videoFileReader);
-frameIdx = frameIdx+1;
-display(frameIdx)
-
-%% 歪み頬正
-[imgL, imgR] = undistortAndRectifyStereoImage(rawStereoImg,...
-    stereoParamsL1R2);
-
-%% グレースケール変換
-grayL = rgb2gray(imgL);
-grayR = rgb2gray(imgR);
-
-%% 顔検出
-% 左右のカメラ画像で顔検出を行う
-[faceBboxL,faceBboxR] = detectFaceBbox(grayL, grayR, faceDetector);
-
-%% 基準カメラの設定
-% 角度、顔検出結果に基づいて基準カメラを設定
-camera=setCamera(faceBboxL,faceBboxR,0);
-
-%% bboxの設定
-if ~isnan(camera)
-    bbox=setBbox(faceBboxL,faceBboxR,camera,size(imgL));
-else
-    disp('prevBbox')
-    bbox=prevBbox;
-    camera=prevCamera;
-end
-
-%% 視差計算
-% bbox領域内のみを計算する
-% 最終的な戻り値の大きさは左カメラ画像の大きさ、右カメラ画像の大きさと等しい
-dispMap = disparityBbox(grayL, grayR, bbox, minDisparity, camera);
-
-%% 3次元座標計算
-% L1R2のステレオパラメータで3次元計算
-% bbox領域内のみで切り出す
-% 最終的な戻り値の大きさはbboxの大きさと等しい
-xyzPoints = reconstructScene(dispMap, stereoParamsL1R2);
-xyzPoints=bbox2ROI(xyzPoints,bbox);
-
-%% 3次元座標を左カメラ基準に変更
-if camera==2
-    xyzPoints=relocate(xyzPoints,stereoParamsL1R2);
-end
-
-%% 顔と背景の分離
-% 	点群をn分割
-% 	z座標をkmeansで2分割
-% 	thl,thr,thzの設定
-% 	thに基いて点群を切り出し
-% 	点群を合成
-
-
-%% ptCloudの作成
-% 	ヨーが0度のときのptCloudをface0として保存
-ptCloud=pointCloud(xyzPoints);
-figure(99);
-pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-title('ptCloud');
-drawnow
-
-%% EOFの確認
-if EOF
-    break
-end
-
-%% prevの設定
-prevCamera=camera;
-prevBbox=bbox;
-
-%%
-toc
+    %% 1フレーム読み込み
+    [rawStereoImg, EOF] = step(videoFileReader);
+    frameIdx = frameIdx+1;
+    display(frameIdx)
+    
+    %% 歪み頬正
+    [imgL, imgR] = undistortAndRectifyStereoImage(rawStereoImg,...
+        stereoParamsL1R2);
+    
+    %% グレースケール変換
+    grayL = rgb2gray(imgL);
+    grayR = rgb2gray(imgR);
+    
+    %% 顔検出
+    % 左右のカメラ画像で顔検出を行う
+    [faceBboxL,faceBboxR] = detectFaceBbox(grayL, grayR, faceDetector);
+    
+    %% 基準カメラの設定
+    % 角度、顔検出結果に基づいて基準カメラを設定
+    camera=setCamera(faceBboxL,faceBboxR,0);
+    
+    %% bboxの設定
+    if ~isnan(camera)
+        bbox=setBbox(faceBboxL,faceBboxR,camera,size(imgL));
+    else
+        disp('prevBbox')
+        bbox=prevBbox;
+        camera=prevCamera;
+    end
+    
+    %% 視差計算
+    % bbox領域内のみを計算する
+    % 最終的な戻り値の大きさは左カメラ画像の大きさ、右カメラ画像の大きさと等しい
+    dispMap = disparityBbox(grayL, grayR, bbox, minDisparity, camera);
+    
+    %% 3次元座標計算
+    % L1R2のステレオパラメータで3次元計算
+    % bbox領域内のみで切り出す
+    % 最終的な戻り値の大きさはbboxの大きさと等しい
+    xyzPoints = reconstructScene(dispMap, stereoParamsL1R2);
+    xyzPoints=bbox2ROI(xyzPoints,bbox);
+    
+    %% 3次元座標を左カメラ基準に変更
+    if camera==2
+        xyzPoints=relocate(xyzPoints,stereoParamsL1R2);
+    end
+    
+    %% 顔と背景の分離
+    % 	点群をn分割
+    % 	z座標をkmeansで2分割
+    % 	thl,thr,thzの設定
+    % 	thに基いて点群を切り出し
+    % 	点群を合成
+    
+    
+    %% ptCloudの作成
+    % 	ヨーが0度のときのptCloudをface0として保存
+    ptCloud=pointCloud(xyzPoints);
+    figure(99);
+    pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+    title('ptCloud');
+    drawnow
+    
+    %% EOFの確認
+    if EOF
+        break
+    end
+    
+    %% prevの設定
+    prevCamera=camera;
+    prevBbox=bbox;
+    
+    %%
+    toc
 end
