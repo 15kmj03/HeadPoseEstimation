@@ -1,42 +1,28 @@
-function [ output_args ] = refineXyzPoints( input_args )
+function [ xyzPoints ] = refineXyzPoints( xyzPoints )
 %REFINEXYZPOINTS ‚±‚ÌŠÖ”‚ÌŠT—v‚ð‚±‚±‚É‹Lq
 %   Ú×à–¾‚ð‚±‚±‚É‹Lq
 
-%%
-
-
-% xyzPoints‚ðn“™•ª
 n=9;
-yy=zeros(1,n*2);
-h=floor(size(xyzPoints,1)/n)-1;
-yy(1)=1;
 
-for i=2:n*2
-    if rem(i,2)
-        yy(i)=yy(i-1)+1;
-    else
-        yy(i)=yy(i-1)+h;
-    end
-end
+%% xyzPoints‚ðn“™•ª
+nxyz=separateXyzPoints(xyzPoints,n);
 
-xyz=cell(n,1);
+%% Å‹}~‰º–@‚Åth‚ðŒˆ’è
 for i=1:n
-    xyz{i}=xyzPoints(yy(i*2-1):yy(i*2),:,:);
-end
-
-% Å‹}~‰º–@‚Åth‚ðŒˆ’è
-for i=1:n
-    xval=xyz{i}(:,:,1);
-    yval=xyz{i}(:,:,2);
-    zval=xyz{i}(:,:,3);
+    xval=nxyz{i}(:,:,1);
+    yval=nxyz{i}(:,:,2);
+    zval=nxyz{i}(:,:,3);
+        
+    temp=[xval(:),yval(:),zval(:)];
+    temp=sortrows(temp);
     
-    xval=xval(:);
-    yval=yval(:);
-    zval=zval(:);
+    xval=temp(:,1);
+    yval=temp(:,2);
+    zval=temp(:,3);
     
-%     figure(i)
-%     plot(xval,zval,'o')
-%     grid on
+    %     figure(i)
+    %     plot(xval,zval,'o')
+    %     grid on
     
     [idx,classCenter] = kmeans(zval,2);
     classCenter=sort(classCenter);
@@ -52,9 +38,10 @@ for i=1:n
     yvalB=yval(xval>centerX);
     zvalB=zval(xval>centerX);
     
-    thA=mean(xvalA(centerZ-1<zvalA & zvalA<centerZ+1));
-    thB=mean(xvalB(centerZ-1<zvalB & zvalB<centerZ+1));
-    
+    %     thA=mean(xvalA(centerZ-1<zvalA & zvalA<centerZ+1));
+    %     thB=mean(xvalB(centerZ-1<zvalB & zvalB<centerZ+1));
+    thA=mean([min(xval),centerX]);
+    thB=mean([max(xval),centerX]);
     
     % A
     M=ones(numel(zvalA),1)*classCenter(1);
@@ -74,6 +61,8 @@ for i=1:n
         end
         thB2=thA+stepWidth;
         thA=thB2;
+        if isnan(thA)
+        end
     end
     thA
     
@@ -95,18 +84,25 @@ for i=1:n
         end
         thB2=thB+stepWidth;
         thB=thB2;
+        if isnan(thB)
+        end
     end
     thB
     xval=[xvalA(zvalA<centerZ&xvalA>thA);xvalB(zvalB<centerZ&xvalB<thB)];
     yval=[yvalA(zvalA<centerZ&xvalA>thA);yvalB(zvalB<centerZ&xvalB<thB)];
     zval=[zvalA(zvalA<centerZ&xvalA>thA);zvalB(zvalB<centerZ&xvalB<thB)];
     
-    xyz{i}=[xval,yval,zval];
+    nxyz{i}=[xval,yval,zval];
+    
+    ptCloud=pointCloud(nxyz{i});
+    figure(9);
+    pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+    title('ptCloud');
     
 end
 
-% ‡¬
-xyzPoints=[xyz{1};xyz{2};xyz{3};xyz{4};xyz{5};xyz{6};xyz{7};xyz{8};xyz{9}];
+%% ‡¬
+xyzPoints=[nxyz{1};nxyz{2};nxyz{3};nxyz{4};nxyz{5};nxyz{6};nxyz{7};nxyz{8};nxyz{9}];
 
 end
 

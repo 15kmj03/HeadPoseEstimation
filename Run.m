@@ -25,7 +25,7 @@ yaws=zeros(301,1);
 rollss=zeros(301,1);
 
 % 動画読み込み
-videoFileReader=vision.VideoFileReader('D:1226\30deg\arai\1.mp4',...
+videoFileReader=vision.VideoFileReader('D:1226\30deg\takumi\1.mp4',...
     'VideoOutputDataType', 'uint8');
 
 % ステレオパラメーター読み込み
