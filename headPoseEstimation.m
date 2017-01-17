@@ -27,7 +27,8 @@ yaws=zeros(301,1);
 rolls=zeros(301,1);
 
 % 動画読み込み
-videoFileReader=vision.VideoFileReader(filename,'VideoOutputDataType', 'uint8');
+videoFileReader=vision.VideoFileReader(filename,...
+    'VideoOutputDataType', 'uint8');
 
 % ステレオパラメーター読み込み
 load('stereoParamsL1R2.mat')
@@ -36,6 +37,32 @@ load('stereoParamsL1R2.mat')
 % 検索対象の大きさをの上限、下限を設定
 faceDetector = vision.CascadeObjectDetector('ClassificationModel',...
     'FrontalFaceCART', 'MinSize', [200,200], 'MaxSize', [400,400]);
+
+minDisparity=nan;
+while isnan(minDisparity)
+    % 1フレーム読み込み
+    [rawStereoImg, EOF] = step(videoFileReader);
+    frameIdx = frameIdx+1;
+    display(frameIdx)
+    
+    % 歪み頬正
+    [imgL, imgR] = undistortAndRectifyStereoImage(rawStereoImg,...
+        stereoParamsL1R2);
+    
+    % グレースケール変換
+    grayL = rgb2gray(imgL);
+    grayR = rgb2gray(imgR);
+    
+    % 顔検出
+    % 左右のカメラ画像で顔検出を行う
+    [faceBboxL,faceBboxR] = detectFaceBbox(grayL, grayR, faceDetector);
+    
+    % minDisparityの設定
+    minDisparity = determineMinDisparity(grayL, grayR, faceBboxL,faceBboxR);
+end
+
+reset(videoFileReader);
+frameIdx=0;
 
 % 1フレーム読み込み
 [rawStereoImg, EOF] = step(videoFileReader);
@@ -50,12 +77,7 @@ display(frameIdx)
 grayL = rgb2gray(imgL);
 grayR = rgb2gray(imgR);
 
-% 顔検出
-% 左右のカメラ画像で顔検出を行う
-[faceBboxL,faceBboxR] = detectFaceBbox(grayL, grayR, faceDetector);
 
-% minDisparityの設定
-minDisparity = determineMinDisparity(grayL, grayR, faceBboxL,faceBboxR);
 
 % 基準カメラの設定
 % 角度、顔検出結果に基づいて基準カメラを設定
@@ -88,20 +110,23 @@ end
 
 % 顔と背景の分離
 xyzPoints=refineXyzPoints(xyzPoints);
+% xyzPoints = refine(xyzPoints);
 
 % ptCloudの作成
 % 	ヨーが0度のときのptCloudをface0として保存
 ptCloud=pointCloud(xyzPoints);
-face0 = pcdownsample(ptCloud, 'random', 0.2);
+face0 = pcdownsample(ptCloud, 'random', 0.1);
 faceMaxYaw = pointCloud([NaN,NaN,NaN]);
 faceMinYaw = pointCloud([NaN,NaN,NaN]);
 face = face0;
+
 
 % 角度
 tform = affine3d;
 pitches(frameIdx) = 0;
 yaws(frameIdx) = 0;
 rolls(frameIdx) = 0;
+
 
 
 % prevの設定
@@ -176,17 +201,18 @@ while 1
     
     %% 顔と背景の分離
     xyzPoints=refineXyzPoints(xyzPoints);
+%     xyzPoints = refine(xyzPoints);
     
     %% ptCloudの作成
     ptCloud=pointCloud(xyzPoints);
     
     %% registration
-    mergeSize = 1;
+    mergeSize = 3;
     
-    new = pcdownsample(ptCloud, 'random', 0.2);
+    new = pcdownsample(ptCloud, 'random', 0.1);
     tform = pcregrigid(new, face, 'Metric', 'pointToPlane',...
         'Extrapolate', true, 'InitialTransform', prevTform,...
-        'MaxIterations', 10, 'InlierRatio', 0.5);
+        'MaxIterations', 10, 'InlierRatio', 1);
     
     %% registrationの結果処理
     [tform,pitch,yaw,roll]=checkTform(tform,prevTform);

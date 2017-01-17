@@ -10,17 +10,17 @@ prevR=prevTform.T(1:3,1:3)';
 
 if abs(prevPitch-pitch)>10
     pitch=prevPitch;
-    tform=affine3d;
+    tform=prevTform;
 end
 
 if abs(prevYaw-yaw)>10
     yaw=prevYaw;
-    tform=affine3d;
+    tform=prevTform;
 end
 
 if abs(prevRoll-roll)>10
     roll=prevRoll;
-    tform=affine3d;
+    tform=prevTform;
 end
 
 end
