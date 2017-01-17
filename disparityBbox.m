@@ -41,7 +41,7 @@ switch camera
         dispMapROI=bm.compute(ROIL, ROIR);
         dispMapROI=single(dispMapROI)/16;
         
-        dispMapROI(dispMapROI<min(dispMapROI(:))+3)=nan;
+        dispMapROI(dispMapROI<min(dispMapROI(:))+10)=min(dispMapROI(:));
         
         disparityMap(y:y+h,x:x+w)=dispMapROI(:,x:x+w);
         
@@ -54,7 +54,7 @@ switch camera
         dispMapROI=bm.compute(ROIR, ROIL);
         dispMapROI=single(dispMapROI)/16;
         
-        dispMapROI(dispMapROI<min(dispMapROI(:))+3)=nan;
+        dispMapROI(dispMapROI<min(dispMapROI(:))+10)=max(dispMapROI(:));
         
         disparityMap(y:y+h,x:x+w)=dispMapROI(:,1:1+w);
     otherwise

@@ -21,7 +21,8 @@ else
     if ~isempty(bboxR)
         disp=calculateDisparity(grayL,grayR,bboxR,2);
     else
-        error('faceBbox‚ª‚ ‚è‚Ü‚¹‚ñ')
+        minDisparity=nan;
+        return
     end    
 end
 

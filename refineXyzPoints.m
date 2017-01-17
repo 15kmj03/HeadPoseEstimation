@@ -2,7 +2,7 @@ function [ xyzPoints ] = refineXyzPoints( xyzPoints )
 %REFINEXYZPOINTS この関数の概要をここに記述
 %   詳細説明をここに記述
 
-n=10;
+n=5;
 
 %% xyzPointsをn等分
 nxyz=separateXyzPoints(xyzPoints,n);
@@ -47,6 +47,10 @@ for i=1:n
     
     nxyz{i}=[newxval,newyval,newzval];
 end
+
+% ZZ=[nxyz{1}(:,3);nxyz{2}(:,3);nxyz{3}(:,3);nxyz{4}(:,3);nxyz{5}(:,3)];
+% [~,ZZZ]=kmeans(ZZ,2);
+% ZZZ=sort(ZZZ);
 
 %% 最急降下法でthを決定
 for i=1:n
@@ -124,9 +128,9 @@ for i=1:n
         end
     end
 %     thB
-    newxval=[xvalA(zvalA<centerZ&xvalA>thA);xvalB(zvalB<centerZ&xvalB<thB)];
-    newyval=[yvalA(zvalA<centerZ&xvalA>thA);yvalB(zvalB<centerZ&xvalB<thB)];
-    newzval=[zvalA(zvalA<centerZ&xvalA>thA);zvalB(zvalB<centerZ&xvalB<thB)];
+    newxval=[xvalA(zvalA<classCenter(2)&xvalA>thA);xvalB(zvalB<classCenter(2)&xvalB<thB)];
+    newyval=[yvalA(zvalA<classCenter(2)&xvalA>thA);yvalB(zvalB<classCenter(2)&xvalB<thB)];
+    newzval=[zvalA(zvalA<classCenter(2)&xvalA>thA);zvalB(zvalB<classCenter(2)&xvalB<thB)];
     
     nxyz{i}=[newxval,newyval,newzval];
     
@@ -138,7 +142,7 @@ for i=1:n
 end
 
 %% 合成
-xyzPoints=[nxyz{1};nxyz{2};nxyz{3};nxyz{4};nxyz{5};nxyz{6};nxyz{7};nxyz{8};nxyz{9};nxyz{10}];
+xyzPoints=[nxyz{1};nxyz{2};nxyz{3};nxyz{4};nxyz{5}];
 
 end
 

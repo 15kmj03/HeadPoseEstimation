@@ -12,13 +12,15 @@ end
 
 % 左右のカメラで検出されている時、prevBetaで場合分け
 if ~isempty(faceBboxL) && ~isempty(faceBboxR)
-    if prevBeta>=0
-        camera=1;
-        return
-    else
-        camera=2;
-        return
-    end
+%     if prevBeta>=0
+%         camera=1;
+%         return
+%     else
+%         camera=2;
+%         return
+%     end
+    camera=2;
+    return
 end
 
 % 左のカメラで検出されている時

@@ -25,7 +25,7 @@ yaws=zeros(301,1);
 rolls=zeros(301,1);
 
 % 動画読み込み
-videoFileReader=vision.VideoFileReader('G:\30deg\arai\1.mp4',...
+videoFileReader=vision.VideoFileReader('G:\30deg\4\5.mp4',...
     'VideoOutputDataType', 'uint8');
 
 % ステレオパラメーター読み込み
@@ -87,19 +87,20 @@ end
 
 % 顔と背景の分離
 xyzPoints=refineXyzPoints(xyzPoints);
+% xyzPoints = refine(xyzPoints);
 
 % ptCloudの作成
 % 	ヨーが0度のときのptCloudをface0として保存
 ptCloud=pointCloud(xyzPoints);
-face0 = pcdownsample(ptCloud, 'random', 0.05);
+face0 = pcdownsample(ptCloud, 'random', 0.2);
 faceMaxYaw = pointCloud([NaN,NaN,NaN]);
 faceMinYaw = pointCloud([NaN,NaN,NaN]);
 face = face0;
 
-% figure(99);
-% pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-% title('ptCloud');
-% drawnow
+figure(99);
+pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+title('ptCloud');
+drawnow
 
 % 角度
 tform = affine3d;
@@ -181,18 +182,19 @@ while 1
     
     %% 顔と背景の分離
     xyzPoints=refineXyzPoints(xyzPoints);
+%     xyzPoints = refine(xyzPoints);
     
     %% ptCloudの作成
     ptCloud=pointCloud(xyzPoints);
-%     figure(99);
-%     pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-%     title('ptCloud');
-%     drawnow
+    figure(99);
+    pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+    title('ptCloud');
+    drawnow
     
     %% registration
-    mergeSize = 3;
+    mergeSize = 5;
     
-    new = pcdownsample(ptCloud, 'random', 0.05);
+    new = pcdownsample(ptCloud, 'random', 0.2);
     tform = pcregrigid(new, face, 'Metric', 'pointToPlane',...
         'Extrapolate', true, 'InitialTransform', prevTform,...
         'MaxIterations', 10, 'InlierRatio', 0.5);

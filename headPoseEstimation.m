@@ -38,6 +38,31 @@ load('stereoParamsL1R2.mat')
 faceDetector = vision.CascadeObjectDetector('ClassificationModel',...
     'FrontalFaceCART', 'MinSize', [200,200], 'MaxSize', [400,400]);
 
+minDisparity = nan;
+while isnan(minDisparity);
+    % 1フレーム読み込み
+    [rawStereoImg, EOF] = step(videoFileReader);
+    frameIdx = frameIdx+1;
+    display(frameIdx)
+    
+    % 歪み頬正
+    [imgL, imgR] = undistortAndRectifyStereoImage(rawStereoImg,...
+        stereoParamsL1R2);
+    
+    % グレースケール変換
+    grayL = rgb2gray(imgL);
+    grayR = rgb2gray(imgR);
+    
+    % 顔検出
+    % 左右のカメラ画像で顔検出を行う
+    [faceBboxL,faceBboxR] = detectFaceBbox(grayL, grayR, faceDetector);
+    
+    % minDisparityの設定
+    minDisparity = determineMinDisparity(grayL, grayR, faceBboxL,faceBboxR);
+end
+reset(videoFileReader);
+frameIdx=0;
+
 % 1フレーム読み込み
 [rawStereoImg, EOF] = step(videoFileReader);
 frameIdx = frameIdx+1;
@@ -51,12 +76,7 @@ display(frameIdx)
 grayL = rgb2gray(imgL);
 grayR = rgb2gray(imgR);
 
-% 顔検出
-% 左右のカメラ画像で顔検出を行う
-[faceBboxL,faceBboxR] = detectFaceBbox(grayL, grayR, faceDetector);
 
-% minDisparityの設定
-minDisparity = determineMinDisparity(grayL, grayR, faceBboxL,faceBboxR);
 
 % 基準カメラの設定
 % 角度、顔検出結果に基づいて基準カメラを設定
@@ -238,27 +258,27 @@ while 1
 %     toc
 end
 
-figure(99);
-pcshow(face0, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-title('face0');
-
-figure(98);
-pcshow(faceMaxYaw, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-title('faceMaxYaw');
-
-figure(97);
-pcshow(faceMinYaw, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-title('faceMinYaw');
-
-figure(96);
-pcshow(face, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-title('face');
-
-figure(95)
-plot(yaws)
-grid on
-xlabel('フレーム数 [sec]')
-ylabel('ヨー角度 [deg]')
+% figure(99);
+% pcshow(face0, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+% title('face0');
+% 
+% figure(98);
+% pcshow(faceMaxYaw, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+% title('faceMaxYaw');
+% 
+% figure(97);
+% pcshow(faceMinYaw, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+% title('faceMinYaw');
+% 
+% figure(96);
+% pcshow(face, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+% title('face');
+% 
+% figure(95)
+% plot(yaws)
+% grid on
+% xlabel('フレーム数 [sec]')
+% ylabel('ヨー角度 [deg]')
 
 
 
