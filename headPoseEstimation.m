@@ -27,8 +27,7 @@ yaws=zeros(301,1);
 rolls=zeros(301,1);
 
 % 動画読み込み
-videoFileReader=vision.VideoFileReader(filename,...
-    'VideoOutputDataType', 'uint8');
+videoFileReader=vision.VideoFileReader(filename,'VideoOutputDataType', 'uint8');
 
 % ステレオパラメーター読み込み
 load('stereoParamsL1R2.mat')
@@ -37,31 +36,6 @@ load('stereoParamsL1R2.mat')
 % 検索対象の大きさをの上限、下限を設定
 faceDetector = vision.CascadeObjectDetector('ClassificationModel',...
     'FrontalFaceCART', 'MinSize', [200,200], 'MaxSize', [400,400]);
-
-minDisparity = nan;
-while isnan(minDisparity);
-    % 1フレーム読み込み
-    [rawStereoImg, EOF] = step(videoFileReader);
-    frameIdx = frameIdx+1;
-    display(frameIdx)
-    
-    % 歪み頬正
-    [imgL, imgR] = undistortAndRectifyStereoImage(rawStereoImg,...
-        stereoParamsL1R2);
-    
-    % グレースケール変換
-    grayL = rgb2gray(imgL);
-    grayR = rgb2gray(imgR);
-    
-    % 顔検出
-    % 左右のカメラ画像で顔検出を行う
-    [faceBboxL,faceBboxR] = detectFaceBbox(grayL, grayR, faceDetector);
-    
-    % minDisparityの設定
-    minDisparity = determineMinDisparity(grayL, grayR, faceBboxL,faceBboxR);
-end
-reset(videoFileReader);
-frameIdx=0;
 
 % 1フレーム読み込み
 [rawStereoImg, EOF] = step(videoFileReader);
@@ -76,7 +50,12 @@ display(frameIdx)
 grayL = rgb2gray(imgL);
 grayR = rgb2gray(imgR);
 
+% 顔検出
+% 左右のカメラ画像で顔検出を行う
+[faceBboxL,faceBboxR] = detectFaceBbox(grayL, grayR, faceDetector);
 
+% minDisparityの設定
+minDisparity = determineMinDisparity(grayL, grayR, faceBboxL,faceBboxR);
 
 % 基準カメラの設定
 % 角度、顔検出結果に基づいて基準カメラを設定
@@ -87,7 +66,7 @@ if ~isnan(camera)
     bbox=setBbox(faceBboxL,faceBboxR,camera,size(imgL));
 else
     bbox=prevBbox;
-    camera=1;
+    camera=2;
 end
 
 % 視差計算
@@ -113,22 +92,16 @@ xyzPoints=refineXyzPoints(xyzPoints);
 % ptCloudの作成
 % 	ヨーが0度のときのptCloudをface0として保存
 ptCloud=pointCloud(xyzPoints);
-face0 = pcdownsample(ptCloud, 'random', 0.05);
+face0 = pcdownsample(ptCloud, 'random', 0.2);
 faceMaxYaw = pointCloud([NaN,NaN,NaN]);
 faceMinYaw = pointCloud([NaN,NaN,NaN]);
 face = face0;
-
-% figure(99);
-% pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-% title('ptCloud');
-% drawnow
 
 % 角度
 tform = affine3d;
 pitches(frameIdx) = 0;
 yaws(frameIdx) = 0;
 rolls(frameIdx) = 0;
-
 
 
 % prevの設定
@@ -206,15 +179,11 @@ while 1
     
     %% ptCloudの作成
     ptCloud=pointCloud(xyzPoints);
-%     figure(99);
-%     pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-%     title('ptCloud');
-%     drawnow
     
     %% registration
-    mergeSize = 3;
+    mergeSize = 1;
     
-    new = pcdownsample(ptCloud, 'random', 0.05);
+    new = pcdownsample(ptCloud, 'random', 0.2);
     tform = pcregrigid(new, face, 'Metric', 'pointToPlane',...
         'Extrapolate', true, 'InitialTransform', prevTform,...
         'MaxIterations', 10, 'InlierRatio', 0.5);
@@ -228,7 +197,6 @@ while 1
     pitches(frameIdx) = pitch;
     yaws(frameIdx) = yaw;
     rolls(frameIdx) = roll;
-    
     
 
     
@@ -255,33 +223,8 @@ while 1
     prevBbox=bbox;
     
     %%
-%     toc
+    toc
 end
-
-% figure(99);
-% pcshow(face0, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-% title('face0');
-% 
-% figure(98);
-% pcshow(faceMaxYaw, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-% title('faceMaxYaw');
-% 
-% figure(97);
-% pcshow(faceMinYaw, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-% title('faceMinYaw');
-% 
-% figure(96);
-% pcshow(face, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-% title('face');
-% 
-% figure(95)
-% plot(yaws)
-% grid on
-% xlabel('フレーム数 [sec]')
-% ylabel('ヨー角度 [deg]')
-
-
-
 
 end
 

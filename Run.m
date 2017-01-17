@@ -25,7 +25,7 @@ yaws=zeros(301,1);
 rolls=zeros(301,1);
 
 % 動画読み込み
-videoFileReader=vision.VideoFileReader('G:\30deg\4\5.mp4',...
+videoFileReader=vision.VideoFileReader('G:\30deg\2\4.mp4',...
     'VideoOutputDataType', 'uint8');
 
 % ステレオパラメーター読み込み
@@ -192,7 +192,7 @@ while 1
     drawnow
     
     %% registration
-    mergeSize = 5;
+    mergeSize = 1;
     
     new = pcdownsample(ptCloud, 'random', 0.2);
     tform = pcregrigid(new, face, 'Metric', 'pointToPlane',...

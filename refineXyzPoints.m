@@ -35,17 +35,27 @@ for i=1:n
     zmean2=mean(zval2);
     zmean3=mean(zval3);
     
-    newxval=[xval1(abs(zval1-zmean1)<zstd1*2);
-        xval2(abs(zval2-zmean2)<zstd2*2);
-        xval3(abs(zval3-zmean3)<zstd3*2)];
-    newyval=[yval1(abs(zval1-zmean1)<zstd1*2);
-        yval2(abs(zval2-zmean2)<zstd2*2);
-        yval3(abs(zval3-zmean3)<zstd3*2)];
-    newzval=[zval1(abs(zval1-zmean1)<zstd1*2);
-        zval2(abs(zval2-zmean2)<zstd2*2);
-        zval3(abs(zval3-zmean3)<zstd3*2)];
+%     newxval=[xval1(abs(zval1-zmean1)<zstd1*2);
+%         xval2(abs(zval2-zmean2)<zstd2*2);
+%         xval3(abs(zval3-zmean3)<zstd3*2)];
+%     newyval=[yval1(abs(zval1-zmean1)<zstd1*2);
+%         yval2(abs(zval2-zmean2)<zstd2*2);
+%         yval3(abs(zval3-zmean3)<zstd3*2)];
+%     newzval=[zval1(abs(zval1-zmean1)<zstd1*2);
+%         zval2(abs(zval2-zmean2)<zstd2*2);
+%         zval3(abs(zval3-zmean3)<zstd3*2)];
+%     
+%     nxyz{i}=[newxval,newyval,newzval];
+
+    zval1(abs(zval1-zmean1)>zstd1*2)=max(zval(:));
+    zval2(abs(zval2-zmean2)>zstd2*2)=max(zval(:));
+    zval3(abs(zval3-zmean3)>zstd3*2)=max(zval(:));
     
-    nxyz{i}=[newxval,newyval,newzval];
+    nxyz{i}=[xval1,yval1,zval1;
+        xval2,yval2,zval2;
+        xval3,yval3,zval3];
+    
+    
 end
 
 % ZZ=[nxyz{1}(:,3);nxyz{2}(:,3);nxyz{3}(:,3);nxyz{4}(:,3);nxyz{5}(:,3)];
