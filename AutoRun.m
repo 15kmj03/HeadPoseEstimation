@@ -1,5 +1,5 @@
-for personid=3:3
-    for num=1:1
+for personid=1:8
+    for num=1:5
         loadDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\';
         saveDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\';
         personname=num2str(personid);
