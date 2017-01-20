@@ -103,16 +103,16 @@ for personid=1:8
     xlabel('グループ番号')
     ylabel('絶対誤差 [deg]')
     grid on
-    savefig([dirName,'result\',personname,'\','hakohige'])
+%     savefig([dirName,'result\',personname,'\','hakohige'])
     
     
 end
 
-xlswrite('C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\mean8_5',mean8_5);
-xlswrite('C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\std8_5',std8_5);
+% xlswrite('C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\mean8_5',mean8_5);
+% xlswrite('C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\std8_5',std8_5);
 
     boxplot(absdiff12000,groupId12000)
     xlabel('グループ番号')
     ylabel('絶対誤差 [deg]')
     grid on
-    savefig([dirName,'result\','hakohige'])
+%     savefig([dirName,'result\','hakohige'])

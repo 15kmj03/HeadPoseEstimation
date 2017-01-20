@@ -205,7 +205,10 @@ while 1
     
     %% ptCloud�̍쐬
     ptCloud=pointCloud(xyzPoints);
-    
+    pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+    xlabel('X [mm]')
+zlabel('X [mm]')
+    drawnow;
     %% registration
     mergeSize = 3;
     

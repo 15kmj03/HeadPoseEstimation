@@ -117,16 +117,16 @@ for i=1:n
 %     thA
     
     % B
-    M=ones(numel(zvalB),1)*classCenter(1);
-    M2=M;
+    N=ones(numel(zvalB),1)*classCenter(1);
+    N2=N;
     for j=1:100
-        M(xvalB<=thB)=classCenter(1);
-        M(xvalB>thB)=classCenter(2);
-        M2(xvalB<=thB+1)=classCenter(1);
-        M2(xvalB>thB+1)=classCenter(2);
+        N(xvalB<=thB)=classCenter(1);
+        N(xvalB>thB)=classCenter(2);
+        N2(xvalB<=thB+1)=classCenter(1);
+        N2(xvalB>thB+1)=classCenter(2);
         
-        fx=sum(abs(M-zvalB));
-        fx2=sum(abs(M2-zvalB));
+        fx=sum(abs(N-zvalB));
+        fx2=sum(abs(N2-zvalB));
         grad=fx2-fx;
         stepWidth=-0.0001*grad;
         if abs(stepWidth)<0.1
