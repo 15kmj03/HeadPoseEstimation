@@ -1,6 +1,14 @@
 function [ xyzPoints ] = refineXyzPoints( xyzPoints )
-%REFINEXYZPOINTS この関数の概要をここに記述
-%   詳細説明をここに記述
+%REFINEXYZPOINTS 顔の点と背景の点を分離し，背景の点を除去する
+% 境界線となる閾値を決定し，閾値以外の点は除く
+%
+%   [ xyzPoints ] = refineXyzPoints( xyzPoints )
+%
+%   input
+%   xyzPoints : 顔領域の3次元座標
+%
+%   output
+%   xyzPoints : 顔の3次元座標
 
 n=5;
 
@@ -34,18 +42,6 @@ for i=1:n
     zmean1=mean(zval1);
     zmean2=mean(zval2);
     zmean3=mean(zval3);
-    
-%     newxval=[xval1(abs(zval1-zmean1)<zstd1*2);
-%         xval2(abs(zval2-zmean2)<zstd2*2);
-%         xval3(abs(zval3-zmean3)<zstd3*2)];
-%     newyval=[yval1(abs(zval1-zmean1)<zstd1*2);
-%         yval2(abs(zval2-zmean2)<zstd2*2);
-%         yval3(abs(zval3-zmean3)<zstd3*2)];
-%     newzval=[zval1(abs(zval1-zmean1)<zstd1*2);
-%         zval2(abs(zval2-zmean2)<zstd2*2);
-%         zval3(abs(zval3-zmean3)<zstd3*2)];
-%     
-%     nxyz{i}=[newxval,newyval,newzval];
 
     zval1(abs(zval1-zmean1)>zstd1*2)=max(zval(:));
     zval2(abs(zval2-zmean2)>zstd2*2)=max(zval(:));
@@ -58,27 +54,17 @@ for i=1:n
     
 end
 
-% ZZ=[nxyz{1}(:,3);nxyz{2}(:,3);nxyz{3}(:,3);nxyz{4}(:,3);nxyz{5}(:,3)];
-% [~,ZZZ]=kmeans(ZZ,2);
-% ZZZ=sort(ZZZ);
-
 %% 最急降下法でthを決定
 for i=1:n
-
     
     xval=nxyz{i}(:,1);
     yval=nxyz{i}(:,2);
     zval=nxyz{i}(:,3);
     
-    %     figure(i)
-%         plot(xval,zval,'o')
-%         grid on
-    
-    [~,classCenter] = kmeans(zval,2);
-    classCenter=sort(classCenter);
+    [temp1,temp2]=k_means(zval);
+    classCenter=[temp1;temp2];
     
     centerX=mean([min(xval),max(xval)]);
-    centerZ=mean(classCenter);
     
     xvalA=xval(xval<=centerX);
     yvalA=yval(xval<=centerX);
@@ -88,19 +74,17 @@ for i=1:n
     yvalB=yval(xval>centerX);
     zvalB=zval(xval>centerX);
     
-    %     thA=mean(xvalA(centerZ-1<zvalA & zvalA<centerZ+1));
-    %     thB=mean(xvalB(centerZ-1<zvalB & zvalB<centerZ+1));
     thA=mean([min(xval),centerX]);
     thB=mean([max(xval),centerX]);
     
     % A
     M=ones(numel(zvalA),1)*classCenter(1);
     M2=M;
-    for j=1:100
-        M(xvalA<=thA)=classCenter(2);
-        M(xvalA>thA)=classCenter(1);
-        M2(xvalA<=thA+1)=classCenter(2);
-        M2(xvalA>thA+1)=classCenter(1);
+    for j=1:50
+        M(xvalA<thA)=classCenter(2);
+        M(xvalA>=thA)=classCenter(1);
+        M2(xvalA<thA+1)=classCenter(2);
+        M2(xvalA>=thA+1)=classCenter(1);
         
         fx=sum(abs(M-zvalA));
         fx2=sum(abs(M2-zvalA));
@@ -119,11 +103,11 @@ for i=1:n
     % B
     N=ones(numel(zvalB),1)*classCenter(1);
     N2=N;
-    for j=1:100
-        N(xvalB<=thB)=classCenter(1);
-        N(xvalB>thB)=classCenter(2);
-        N2(xvalB<=thB+1)=classCenter(1);
-        N2(xvalB>thB+1)=classCenter(2);
+    for j=1:50
+        N(xvalB<thB)=classCenter(1);
+        N(xvalB>=thB)=classCenter(2);
+        N2(xvalB<thB+1)=classCenter(1);
+        N2(xvalB>=thB+1)=classCenter(2);
         
         fx=sum(abs(N-zvalB));
         fx2=sum(abs(N2-zvalB));
@@ -138,21 +122,17 @@ for i=1:n
         end
     end
 %     thB
-    newxval=[xvalA(zvalA<classCenter(2)&xvalA>thA);xvalB(zvalB<classCenter(2)&xvalB<thB)];
-    newyval=[yvalA(zvalA<classCenter(2)&xvalA>thA);yvalB(zvalB<classCenter(2)&xvalB<thB)];
-    newzval=[zvalA(zvalA<classCenter(2)&xvalA>thA);zvalB(zvalB<classCenter(2)&xvalB<thB)];
+    newxval=[xvalA(zvalA<classCenter(2)&xvalA>thA);...
+        xvalB(zvalB<classCenter(2)&xvalB<thB)];
+    newyval=[yvalA(zvalA<classCenter(2)&xvalA>thA);...
+        yvalB(zvalB<classCenter(2)&xvalB<thB)];
+    newzval=[zvalA(zvalA<classCenter(2)&xvalA>thA);...
+        zvalB(zvalB<classCenter(2)&xvalB<thB)];
     
     nxyz{i}=[newxval,newyval,newzval];
-    
-%     ptCloud=pointCloud(nxyz{i});
-%     figure(9);
-%     pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-%     title('ptCloud');
-    
 end
 
 %% 合成
 xyzPoints=[nxyz{1};nxyz{2};nxyz{3};nxyz{4};nxyz{5}];
 
 end
-

@@ -1,6 +1,10 @@
-function [ stereoParams,ROIBbox ] = modifyStereoParams( stereoParams,faceBbox )
-%MODIFYSTEREOPARAMS この関数の概要をここに記述
-%   詳細説明をここに記述
+function [ stereoParams,ROIBbox ] = modifyStereoParams( ...
+    stereoParams,faceBbox )
+%MODIFYSTEREOPARAMS ステレオパラメータの辻褄を合わせる
+%
+%   [ stereoParams,ROIBbox ] = modifyStereoParams(...
+%   stereoParams,faceBbox )
+
 
 %% ステレオ画像のROIを設定
 PP=stereoParams.CameraParameters1.PrincipalPoint;
@@ -35,9 +39,11 @@ ROIBbox=[xx,yy,ww,hh];
 %% ROIに合わせてステレオパラメーターを調整
 params = toStruct(stereoParams);
 
-params.CameraParameters1.IntrinsicMatrix(3,2)=params.CameraParameters1.IntrinsicMatrix(3,2)-(yy-1);
-params.CameraParameters2.IntrinsicMatrix(3,2)=params.CameraParameters2.IntrinsicMatrix(3,2)-(yy-1);
+params.CameraParameters1.IntrinsicMatrix(3,2)=...
+    params.CameraParameters1.IntrinsicMatrix(3,2)-(yy-1);
+params.CameraParameters2.IntrinsicMatrix(3,2)=...
+    params.CameraParameters2.IntrinsicMatrix(3,2)-(yy-1);
 
 stereoParams = stereoParameters(params);
-end
 
+end

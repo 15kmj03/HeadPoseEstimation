@@ -1,14 +1,17 @@
 function [ pitches,yaws,rolls ] = headPoseEstimation( filename )
 %HEADPOSEESTIMATION 頭部姿勢変化推定を行う
-%   詳細説明をここに記述
-
-
-
-% 頭部姿勢角度の変化を推定する関数
-
+%
+% input
+% filename : 動画ファイル名
+%
+% output
+% pitches : ピッチ角変化
+% yaws : ヨー角変化
+% rolls : ロール角変化
+%
 % グローバル座標系で左カメラの位置を原点とする
 % 右手座標系
-
+%
 % フレームごとに処理の基準となるカメラを選択し、切り替える
 % ヨー角度の符号は首を右に振る方向が正、左に振る方向が負
 % ヨー角度が正...右カメラ画像を使用
@@ -58,7 +61,8 @@ while isnan(minDisparity)
     [faceBboxL,faceBboxR] = detectFaceBbox(grayL, grayR, faceDetector);
     
     % minDisparityの設定
-    minDisparity = determineMinDisparity(grayL, grayR, faceBboxL,faceBboxR);
+    minDisparity = determineMinDisparity(grayL, grayR,...
+        faceBboxL,faceBboxR);
 end
 
 reset(videoFileReader);
@@ -76,8 +80,6 @@ display(frameIdx)
 % グレースケール変換
 grayL = rgb2gray(imgL);
 grayR = rgb2gray(imgR);
-
-
 
 % 基準カメラの設定
 % 角度、顔検出結果に基づいて基準カメラを設定
@@ -113,21 +115,18 @@ xyzPoints=refineXyzPoints(xyzPoints);
 % xyzPoints = refine(xyzPoints);
 
 % ptCloudの作成
-% 	ヨーが0度のときのptCloudをface0として保存
+% ヨーが0度のときのptCloudをface0として保存
 ptCloud=pointCloud(xyzPoints);
 face0 = pcdownsample(ptCloud, 'random', 0.1);
 faceMaxYaw = pointCloud([NaN,NaN,NaN]);
 faceMinYaw = pointCloud([NaN,NaN,NaN]);
 face = face0;
 
-
 % 角度
 tform = affine3d;
 pitches(frameIdx) = 0;
 yaws(frameIdx) = 0;
 rolls(frameIdx) = 0;
-
-
 
 % prevの設定
 prevTform=tform;
@@ -137,9 +136,11 @@ prevBbox=bbox;
 % ROIの設定、ステレオパラメータの辻褄を合わせる
 switch camera
     case 1
-        [stereoParamsL1R2, ROI] = modifyStereoParams(stereoParamsL1R2, faceBboxL);
+        [stereoParamsL1R2, ROI] = modifyStereoParams(...
+            stereoParamsL1R2, faceBboxL);
     case 2
-        [stereoParamsL1R2, ROI] = modifyStereoParams(stereoParamsL1R2, faceBboxR);
+        [stereoParamsL1R2, ROI] = modifyStereoParams(...
+            stereoParamsL1R2, faceBboxR);
 end
 
 % bboxの位置を更新
@@ -147,7 +148,6 @@ prevBbox(2)=prevBbox(2)-ROI(2)-1;
 
 %% ループ
 while 1
-    tic
     
     %% 1フレーム読み込み
     [rawStereoImg, EOF] = step(videoFileReader);
@@ -167,7 +167,8 @@ while 1
     
     %% 顔検出
     % 左右のカメラ画像で顔検出を行う
-    [faceBboxL,faceBboxR] = detectFaceBbox(grayL, grayR, faceDetector);
+    [faceBboxL,faceBboxR] = detectFaceBbox(grayL, grayR,...
+        faceDetector);
     
     %% 基準カメラの設定
     % 角度、顔検出結果に基づいて基準カメラを設定
@@ -184,7 +185,8 @@ while 1
     
     %% 視差計算
     % bbox領域内のみを計算する
-    % 最終的な戻り値の大きさは左カメラ画像の大きさ、右カメラ画像の大きさと等しい
+    % 最終的な戻り値の大きさは左カメラ画像の大きさ、
+    % 右カメラ画像の大きさと等しい
     dispMap = disparityBbox(grayL, grayR, bbox, minDisparity, camera);
     
     %% 3次元座標計算
@@ -201,13 +203,12 @@ while 1
     
     %% 顔と背景の分離
     xyzPoints=refineXyzPoints(xyzPoints);
-%     xyzPoints = refine(xyzPoints);
     
     %% ptCloudの作成
     ptCloud=pointCloud(xyzPoints);
     pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
     xlabel('X [mm]')
-zlabel('X [mm]')
+    zlabel('X [mm]')
     drawnow;
     %% registration
     mergeSize = 3;
@@ -228,7 +229,7 @@ zlabel('X [mm]')
     rolls(frameIdx) = roll;
     
 
-    
+    % 基準顔点群の更新
     if yaw > maxYaw
         faceMaxYaw = pctransform(new, tform);
         faceMearge = pcmerge(faceMaxYaw, faceMinYaw, mergeSize);
@@ -239,8 +240,7 @@ zlabel('X [mm]')
         faceMearge=pcmerge(faceMaxYaw, faceMinYaw, mergeSize);
         face = pcmerge(face0, faceMearge, mergeSize);
     end        
-        
-    
+
     %% EOFの確認
     if EOF
         break
@@ -251,8 +251,6 @@ zlabel('X [mm]')
     prevCamera=camera;
     prevBbox=bbox;
     
-    %%
-    toc
 end
 
 end

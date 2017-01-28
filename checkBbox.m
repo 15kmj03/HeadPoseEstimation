@@ -1,7 +1,12 @@
 function [ bbox ] = checkBbox( bbox, imageSize )
-%CHECKBBOX この関数の概要をここに記述
-%   詳細説明をここに記述
-
+%CHECKBBOX bboxが正常であることを確認する
+%
+%   input
+%   bbox : 確認前のbbox
+%   imageSize : 画像サイズ
+%
+%   output
+%   bbox : 確認後のbbox
 %%
 
 rows=imageSize(1);
@@ -29,4 +34,3 @@ if y+h>rows
 end
 
 end
-

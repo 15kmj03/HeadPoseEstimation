@@ -13,4 +13,3 @@ if abs(centerYL-centerYR)>th
 end
 
 end
-

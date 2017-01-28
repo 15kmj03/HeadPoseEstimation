@@ -5,9 +5,9 @@ clc
 %頭部姿勢角度の変化を推定するスクリプト
 
 %%
-loadFileName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\1\1.mp4';
+loadFileName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\3\2.mp4';
 % loadFileName='D:\1226\drive\arai\1.mp4';
-loadFileNameS='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\1\1_sens_yaws.mat';
+loadFileNameS='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\3\2_sens_yaws.mat';
 load(loadFileNameS);
 
 [pitches,yaws,rolls]=headPoseEstimation(loadFileName);

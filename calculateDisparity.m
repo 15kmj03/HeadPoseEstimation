@@ -1,5 +1,5 @@
 function [ disparity ] = calculateDisparity( grayL,grayR,bbox,camera )
-%CALCULATEDISPARITY 左カメラbbox領域の視差を計算する
+%CALCULATEDISPARITY bbox領域の視差を計算する
 %
 %   [ disparity ] = calculateDisparity( grayL,grayR,bbox )
 %
@@ -20,7 +20,6 @@ y=bbox(2);  % y
 w=bbox(3);  % width
 h=bbox(4);  % height
 
-
 switch camera
     case 1
         absdiff=zeros(1,x); % 差の総和を保存する為の変数
@@ -28,9 +27,12 @@ switch camera
         imgFace=bbox2ROI(grayL,bbox);  % bbox領域を切り出す
         
         for i=1:x
-            bboxROI=[i,y,w,h];                              % ROIの設定
-            ROI=bbox2ROI(grayR,bboxROI);                    % ROI領域を切り出す
-            absdiff(i)=sum(sum(imabsdiff(imgFace,ROI)));    % 差の総和を計算
+            % ROIの設定
+            bboxROI=[i,y,w,h];
+            % ROI領域を切り出す
+            ROI=bbox2ROI(grayR,bboxROI);
+            % 差の総和を計算
+            absdiff(i)=sum(sum(imabsdiff(imgFace,ROI)));
         end
         
         [~,I]=min(absdiff); % 最小のインデックスを探す
@@ -38,14 +40,17 @@ switch camera
         disparity=abs(x-I);
         
     case 2
-                absdiff=zeros(1,imgSize(2)-w); % 差の総和を保存する為の変数
+        absdiff=zeros(1,imgSize(2)-w); % 差の総和を保存する為の変数
         
         imgFace=bbox2ROI(grayR,bbox);  % bbox領域を切り出す
         
         for i=x:imgSize(2)-w
-            bboxROI=[i,y,w,h];                              % ROIの設定
-            ROI=bbox2ROI(grayL,bboxROI);                    % ROI領域を切り出す
-            absdiff(i)=sum(sum(imabsdiff(imgFace,ROI)));    % 差の総和を計算
+            % ROIの設定
+            bboxROI=[i,y,w,h];
+            % ROI領域を切り出す
+            ROI=bbox2ROI(grayL,bboxROI);
+            % 差の総和を計算
+            absdiff(i)=sum(sum(imabsdiff(imgFace,ROI)));
             
         end
         [~,I]=min(absdiff(x:end)); % 最小のインデックスを探す
@@ -54,13 +59,9 @@ switch camera
         disparity=abs(x-I);
 end
 
-
-
-
-
 % figure(1)
 % plot(absdiff)
-% 
+%
 % figure
 % bbox=[I,y,w,h];
 % ROI=bbox2ROI(grayL,bbox);

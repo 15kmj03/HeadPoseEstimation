@@ -1,7 +1,9 @@
-function [ faceBboxL,faceBboxR ] = detectFaceBbox( grayL,grayR,faceDetector )
+function [ faceBboxL,faceBboxR ] = detectFaceBbox( grayL,grayR,...
+    faceDetector )
 %DETECTFACE 左右のカメラ画像で顔領域を検出する
 %
-%   [ faceBbox ] = detectFaceBbox( grayL,grayR,frontalFaceDetector,profileFaceDetector,camera )
+%   [ faceBbox ] = detectFaceBbox(
+%   grayL,grayR,frontalFaceDetector,profileFaceDetector,camera )
 %
 %   input
 %   grayL : 左グレー画像
@@ -38,4 +40,3 @@ if ~isempty(faceBboxL) && ~isempty(faceBboxR)
 end
 
 end
-

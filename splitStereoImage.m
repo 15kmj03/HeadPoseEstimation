@@ -18,4 +18,3 @@ img1 = stereoImage(:, 1:cols/2, :);
 img2 = stereoImage(:, cols/2+1:cols, :);
 
 end
-

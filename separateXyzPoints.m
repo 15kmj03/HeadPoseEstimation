@@ -1,6 +1,13 @@
 function [ nxyz ] = separateXyzPoints( xyzPoints,n )
 %SEPARATEXYZPOINTS xyzPointsをn分割する
-%   詳細説明をここに記述
+%
+%   [ nxyz ] = separateXyzPoints( xyzPoints,n )
+%
+%   input
+%   xyzPoints : 点群の3次元座標
+%
+%   output
+%   nxyz : n分割された3次元座標
 
 %% インデックス行列作成
 yy=zeros(1,n*2);
@@ -28,4 +35,3 @@ for i=1:n
 end
 
 end
-

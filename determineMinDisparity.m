@@ -1,4 +1,5 @@
-function [ minDisparity ] = determineMinDisparity( grayL,grayR,bboxL,bboxR )
+function [ minDisparity ] = determineMinDisparity( grayL,grayR,...
+    bboxL,bboxR )
 %DETERMINEDISPARITYRANGE 視差の最小値を決定する
 %   第1引数は左カメラ画像、第2引数は右カメラ画像で固定
 %
@@ -29,4 +30,3 @@ end
 minDisparity=disp-(8*4);
     
 end
-

@@ -1,8 +1,7 @@
 function [ bbox ] = setBbox( faceBboxL,faceBboxR,camera,imgSize )
-%SETBBOX bbox‚ðÝ’è‚·‚é
+%SETBBOX Šî€ƒJƒƒ‰‚ÉŠî‚¢‚Ä3ŽŸŒ³•œŒ³‚Ì‘ÎÛ‚Æ‚È‚ébbox‚ðÝ’è‚·‚é
 % 	faceBbox‚Ìc•20%Œ¸
 % 	faceBbox‚Ì‰¡•40%‘
-
 
 %% Ý’è
 switch camera
@@ -18,4 +17,3 @@ end
 bbox=checkBbox(bbox,imgSize);
 
 end
-

@@ -1,8 +1,10 @@
-function [ imgL,imgR ] = undistortAndRectifyStereoImage( rawStereoImg,stereoParams )
+function [ imgL,imgR ] = undistortAndRectifyStereoImage(...
+    rawStereoImg,stereoParams )
 %UNDISTORTANDRECTIFYSTEREOIMAGE ステレオ画像の歪み補正と平行化を行う
 % 	L1R2のステレオパラメータで歪み補正
 %
-%   [ imgL, imgR ] = undistortAndRectifyStereoImage( rawStereoImg, stereoParamsL1R2 )
+%   [ imgL, imgR ] = undistortAndRectifyStereoImage(... rawStereoImg,
+%   stereoParamsL1R2 )
 %
 %   input
 %   rawStereoImg : ステレオ画像
@@ -19,7 +21,7 @@ function [ imgL,imgR ] = undistortAndRectifyStereoImage( rawStereoImg,stereoPara
 [rawR,rawL] = splitStereoImage(rawStereoImg);
 
 % 歪み補正と平行化
-[imgL,imgR] = rectifyStereoImages(rawL, rawR, stereoParams, 'OutputView', 'valid');
+[imgL,imgR] = rectifyStereoImages(rawL, rawR, stereoParams,...
+    'OutputView', 'valid');
 
 end
-

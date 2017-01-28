@@ -1,7 +1,16 @@
 function [ xyzPoints ] = relocate( xyzPoints, stereoParams )
-%RELOCATE この関数の概要をここに記述
-%   詳細説明をここに記述
+%RELOCATE 3次元座標を左カメラ基準に変更
+%
+% [ xyzPoints ] = relocate( xyzPoints, stereoParams )
+%
+%   input
+%   xyzPoints : 3次元復元された座標
+%   stereoParams : カメラパラメータ
+%
+%   output
+%   xyzPoints : 左カメラを基準とした3次元座標
 
+%%
 t=stereoParams.TranslationOfCamera2;
 
 xyzPoints=-xyzPoints;
