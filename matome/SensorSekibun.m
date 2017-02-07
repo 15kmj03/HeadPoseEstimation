@@ -1,12 +1,12 @@
 %%
 % センサーから得られたデータを積分するスクリプト
 
-start=690;
+start=1950;
 
 
-pitches=pitches(1:300);
-yaws=yaws(1:300);
-rolls=rolls(1:300);
+% pitches=pitches(1:300);
+% yaws=yaws(1:300);
+% rolls=rolls(1:300);
 
 GyroXX=GyroX(start:start+1500)-aveGyroX;
 GyroYY=GyroY(start:start+1500)-aveGyroY;

@@ -2,23 +2,28 @@ close all
 clear
 clc
 
-%頭部姿勢角度の変化を推定するスクリプト
+% 頭部姿勢角度変化を推定する関数を実行するスクリプト
 
-%%
-loadFileName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\3\2.mp4';
-% loadFileName='D:\1226\drive\arai\1.mp4';
-loadFileNameS='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\3\2_sens_yaws.mat';
+
+%% 読み込むファイル名の設定
+% 動画のファイル名
+loadFileName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\2\5.mp4';
+% センサのファイル名
+loadFileNameS='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\2\5_sens_yaws.mat';
 load(loadFileNameS);
 
+%% 頭部姿勢角度変化推定
 [pitches,yaws,rolls]=headPoseEstimation(loadFileName);
 
-x=1:300;
+%% 結果の表示
+x=0:299;
 yaws=yaws(1:300);
-figure(1)
-plot(x,yaws,x,sens_betas)
-ylim([-30,30])
+plot(x,yaws,'-',x,sens_betas,'--')
+legend('推定値','センサ値')
 grid on
 xlabel('時間 [s]')
 ylabel('ヨー角度 [deg]')
-
-
+ax=gca;
+ax.YAxisLocation = 'origin';
+ax.XTickLabel=0:2.5:15;
+xlim([0,310])

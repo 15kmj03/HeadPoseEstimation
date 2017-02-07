@@ -93,7 +93,7 @@ groupId(b<-25)=1;
 %         groupId=[groupId;8];
 %         absdiff1500=[absdiff1500;nan];
 %     end
-%         if sum(groupId==9)==0
+% cx        if sum(groupId==9)==0
 %         groupId=[groupId;9];
 %         absdiff1500=[absdiff1500;nan];
 %     end

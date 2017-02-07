@@ -34,6 +34,6 @@ for personid=1:8
         ax.XAxisLocation='origin';
         grid on
         savefig(saveFileName)
-        print('-painters','-depsc',saveFileNameEps)
+%         print('-painters','-depsc',saveFileNameEps)
     end
 end

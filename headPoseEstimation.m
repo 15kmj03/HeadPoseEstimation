@@ -1,6 +1,8 @@
 function [ pitches,yaws,rolls ] = headPoseEstimation( filename )
 %HEADPOSEESTIMATION 頭部姿勢変化推定を行う
 %
+%   [ pitches,yaws,rolls ] = headPoseEstimation( filename )
+%
 % input
 % filename : 動画ファイル名
 %
@@ -9,19 +11,28 @@ function [ pitches,yaws,rolls ] = headPoseEstimation( filename )
 % yaws : ヨー角変化
 % rolls : ロール角変化
 %
+%
+% mexopencvの関数を利用する
+% mexopencvを利用できる環境を構築する必要あり
+%
 % グローバル座標系で左カメラの位置を原点とする
 % 右手座標系
 %
-% フレームごとに処理の基準となるカメラを選択し、切り替える
-% ヨー角度の符号は首を右に振る方向が正、左に振る方向が負
+% フレームごとに3次元処理の基準となるカメラを選択し、切り替える
 % ヨー角度が正...右カメラ画像を使用
 % ヨー角度が負...左カメラ画像を使用
-
+% ヨー角度の符号は首を右に振る方向が正、左に振る方向が負
+%
+% ステレオパラメーター中のカメラ番号
+% 1:左カメラ
+% 2:右カメラ
+%
 % windowsでvision.VideoFileReaderを使用してmp4ファイルを読み込むとき、
 % matlab.video.read.UseHardwareAcceleration('off')を実行したほうが
 % 高速になることがある
 
-%% 1回のみ
+
+%% 初期設定
 
 frameIdx=0;
 prevBbox=[];
@@ -41,6 +52,10 @@ load('stereoParamsL1R2.mat')
 faceDetector = vision.CascadeObjectDetector('ClassificationModel',...
     'FrontalFaceCART', 'MinSize', [200,200], 'MaxSize', [400,400]);
 
+
+%% 基準顔点群を得る処理
+
+% minDisparityが決定されるまで繰り返す
 minDisparity=nan;
 while isnan(minDisparity)
     % 1フレーム読み込み
@@ -105,7 +120,7 @@ dispMap = disparityBbox(grayL, grayR, bbox, minDisparity, camera);
 xyzPoints = reconstructScene(dispMap, stereoParamsL1R2);
 xyzPoints=bbox2ROI(xyzPoints,bbox);
 
-% 3次元座標を左カメラ基準に変更
+% 点群の3次元座標を左カメラ基準に変更
 if camera==2
     xyzPoints=relocate(xyzPoints,stereoParamsL1R2);
 end
@@ -190,7 +205,6 @@ while 1
     dispMap = disparityBbox(grayL, grayR, bbox, minDisparity, camera);
     
     %% 3次元座標計算
-    % L1R2のステレオパラメータで3次元計算
     % bbox領域内のみで切り出す
     % 最終的な戻り値の大きさはbboxの大きさと等しい
     xyzPoints = reconstructScene(dispMap, stereoParamsL1R2);
@@ -208,12 +222,15 @@ while 1
     ptCloud=pointCloud(xyzPoints);
     pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
     xlabel('X [mm]')
-    zlabel('X [mm]')
+    ylabel('Y [mm]')
+    zlabel('Z [mm]')
     drawnow;
+    
     %% registration
     mergeSize = 3;
     
     new = pcdownsample(ptCloud, 'random', 0.1);
+    disp(new.Count)
     tform = pcregrigid(new, face, 'Metric', 'pointToPlane',...
         'Extrapolate', true, 'InitialTransform', prevTform,...
         'MaxIterations', 10, 'InlierRatio', 1);
@@ -227,7 +244,6 @@ while 1
     pitches(frameIdx) = pitch;
     yaws(frameIdx) = yaw;
     rolls(frameIdx) = roll;
-    
 
     % 基準顔点群の更新
     if yaw > maxYaw
