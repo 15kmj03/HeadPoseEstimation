@@ -1,44 +1,33 @@
-for personid=1:8
-    for num=1:5
-        loadDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\';
-        saveDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\';
+% 自動で全員の頭部姿勢角度変化推定を行うスクリプト
+
+
+%%
+
+for personid=7:7
+    for num=4:4
+        videoDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\Drive\StereoCamera\';
+        resultDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\Drive\StereoCamera\';
         personname=num2str(personid);
         numname=num2str(num);
-        if personid==7
-            suffix='.avi';
-        else
-            suffix='.mp4';
-        end
         
         
-        loadFileName=[loadDirName,personname,'\',numname,suffix];
-        loadFileNameS=[loadDirName,personname,'\',numname,'_sens_yaws.mat'];
-        saveFileNameP=[saveDirName,personname,'\',numname,'_pitches'];
-        saveFileNameY=[saveDirName,personname,'\',numname,'_yaws'];
-        saveFileNameR=[saveDirName,personname,'\',numname,'_rolls'];
-        saveFileNameF=[saveDirName,personname,'\',numname];
+        loadVideoFileName=[videoDirName,personname,'\',numname,'.mp4'];
+        savePitchFileName=[resultDirName,personname,'\',numname,'_pitches'];
+        saveYawFileName=[resultDirName,personname,'\',numname,'_yaws'];
+        saveRollFileName=[resultDirName,personname,'\',numname,'_rolls'];
+        saveXFileName=[resultDirName,personname,'\',numname,'_Xs'];
+        saveYFileName=[resultDirName,personname,'\',numname,'_Ys'];
+        saveZFileName=[resultDirName,personname,'\',numname,'_Zs'];
         
-        [pitches,yaws,rolls]=headPoseEstimation(loadFileName);
+        [pitches,yaws,rolls,Xs,Ys,Zs]=headPoseEstimation(loadVideoFileName);
         
-        
-        load(loadFileNameS);
-        x=1:300;
-        yaws=yaws(1:300);
-        figure(1)
-        plot(x,yaws,x,sens_betas,'--')
-        xlim([0,310])
-        ylim([-30,30])
-        grid on
-        xlabel('時間 [sec]')
-        ylabel('ヨー角度 [deg]')
-        legend('推定値','センサ値')
-        ax = gca;
-        ax.XAxisLocation = 'origin';
-        ax.XTickLabel = 0:2.5:15;
-        
-        save(saveFileNameP,'pitches')
-        save(saveFileNameY,'yaws')
-        save(saveFileNameR,'rolls')
-        savefig(saveFileNameF)
+        %% 保存
+%         save(savePitchFileName,'pitches')
+%         save(saveYawFileName,'yaws')
+%         save(saveRollFileName,'rolls')
+%         save(saveXFileName,'Xs')
+%         save(saveYFileName,'Ys')
+%         save(saveZFileName,'Zs')
+
     end
 end

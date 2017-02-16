@@ -1,118 +1,166 @@
+% 絶対誤差と標準偏差を計算し，箱ひげ図をプロットするスクリプト
+
 close all
 clear
 clc
 
-groupId12000=[];
-absdiff12000=[];
+%% ステレオカメラ
+sens=[];
+est=[];
+stdMat=[];
+absdiffMat=[];
 
-mean8_5=zeros(8,5);
-std8_5=zeros(8,5);
 for personid=1:8
-    yaws300_5=zeros(300,5);
-    sensYaws300_5=zeros(300,5);
-    groupId=zeros(1500,1);
-    
     for num=1:5
-        dirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\';
-        personname=num2str(personid);
-        numname=num2str(num);
+        resultDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\30deg\StereoCamera\';
+        sensorDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\30deg\MotionSensor\';
+        saveDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\30deg\StereoCamera\';
         
-        loadFileNameYaw=[dirName,'result\',personname,'\',numname,'_yaws.mat'];
-        loadFileNameSensYaw=[dirName,'data\',personname,'\',numname,'_sens_yaws.mat'];
+        personName=num2str(personid);
+        numName=num2str(num);
         
-        load(loadFileNameYaw);
-        load(loadFileNameSensYaw);
+        resultFileName=[resultDirName,personName,'\',numName,'_yaws.mat'];
+        sensorFileName=[sensorDirName,personName,'\',numName,'_sens_yaws.mat'];
         
-        yaws300_5(:,num)=yaws;
-        sensYaws300_5(:,num)=sens_betas;
+        load(resultFileName);
+        load(sensorFileName);
+        
+        sens=[sens;sens_yaws];
+        est=[est;yaws];
+        
+        absdiffMat(personid,num)=mean(abs(yaws-sens_yaws));
+        stdMat(personid,num)=std(abs(yaws-sens_yaws));
     end
-    
-    absdiff300_5=abs(yaws300_5-sensYaws300_5);
-    mean8_5(personid,:)=mean(absdiff300_5);
-    std8_5(personid,:)=std(absdiff300_5);
-    
-    sensyaws1500=sensYaws300_5(:);
-    absdiff1500=absdiff300_5(:);
-    
-    groupId(sensyaws1500<-25)=1;
-    groupId(-25<=sensyaws1500&sensyaws1500<-20)=2;
-    groupId(-20<=sensyaws1500&sensyaws1500<-15)=3;
-    groupId(-15<=sensyaws1500&sensyaws1500<-10)=4;
-    groupId(-10<=sensyaws1500&sensyaws1500<-5)=5;
-    groupId(-5<=sensyaws1500&sensyaws1500<0)=6;
-    groupId(0<=sensyaws1500&sensyaws1500<5)=7;
-    groupId(5<=sensyaws1500&sensyaws1500<10)=8;
-    groupId(10<=sensyaws1500&sensyaws1500<15)=9;
-    groupId(15<=sensyaws1500&sensyaws1500<20)=10;
-    groupId(20<=sensyaws1500&sensyaws1500<25)=11;
-    groupId(25<=sensyaws1500)=12;
-    
-    groupId12000=[groupId12000;groupId];
-    absdiff12000=[absdiff12000;absdiff1500];
-    
-    if sum(groupId==1)==0
-        groupId=[groupId;1];
-        absdiff1500=[absdiff1500;nan];
-    end
-    if sum(groupId==2)==0
-        groupId=[groupId;2];
-        absdiff1500=[absdiff1500;nan];
-    end
-    if sum(groupId==3)==0
-        groupId=[groupId;3];
-        absdiff1500=[absdiff1500;nan];
-    end
-    if sum(groupId==4)==0
-        groupId=[groupId;4];
-        absdiff1500=[absdiff1500;nan];
-    end
-    if sum(groupId==5)==0
-        groupId=[groupId;5];
-        absdiff1500=[absdiff1500;nan];
-    end
-    if sum(groupId==6)==0
-        groupId=[groupId;6];
-        absdiff1500=[absdiff1500;nan];
-    end
-    if sum(groupId==7)==0
-        groupId=[groupId;7];
-        absdiff1500=[absdiff1500;nan];
-    end
-    if sum(groupId==8)==0
-        groupId=[groupId;8];
-        absdiff1500=[absdiff1500;nan];
-    end
-        if sum(groupId==9)==0
-        groupId=[groupId;9];
-        absdiff1500=[absdiff1500;nan];
-    end
-    if sum(groupId==10)==0
-        groupId=[groupId;10];
-        absdiff1500=[absdiff1500;nan];
-    end
-    if sum(groupId==11)==0
-        groupId=[groupId;11];
-        absdiff1500=[absdiff1500;nan];
-    end
-    if sum(groupId==12)==0
-        groupId=[groupId;12];
-        absdiff1500=[absdiff1500;nan];
-    end
-    
-    boxplot(absdiff1500,groupId)
-    xlabel('グループ番号')
-    ylabel('絶対誤差 [deg]')
-    grid on
-%     savefig([dirName,'result\',personname,'\','hakohige'])
-    
-    
 end
 
-% xlswrite('C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\mean8_5',mean8_5);
-% xlswrite('C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\std8_5',std8_5);
+error=abs(sens-est);
+groupId=zeros(size(error));
 
-    boxplot(absdiff12000,groupId12000)
+groupId(sens<-25)=1;
+groupId(-25<=sens&sens<-20)=2;
+groupId(-20<=sens&sens<-15)=3;
+groupId(-15<=sens&sens<-10)=4;
+groupId(-10<=sens&sens<-5)=5;
+groupId(-5<=sens&sens<0)=6;
+groupId(0<=sens&sens<5)=7;
+groupId(5<=sens&sens<10)=8;
+groupId(10<=sens&sens<15)=9;
+groupId(15<=sens&sens<20)=10;
+groupId(20<=sens&sens<25)=11;
+groupId(25<=sens)=12;
+
+count(1)=sum(groupId==1);
+count(2)=sum(groupId==2);
+count(3)=sum(groupId==3);
+count(4)=sum(groupId==4);
+count(5)=sum(groupId==5);
+count(6)=sum(groupId==6);
+count(7)=sum(groupId==7);
+count(8)=sum(groupId==8);
+count(9)=sum(groupId==9);
+count(10)=sum(groupId==10);
+count(11)=sum(groupId==11);
+count(12)=sum(groupId==12);
+
+% 箱ひげ図をプロット
+    boxplot(error,groupId)
     xlabel('グループ番号')
     ylabel('絶対誤差 [deg]')
-    grid on
-%     savefig([dirName,'result\','hakohige'])
+    grid on    
+    hold on
+    
+    % データ数をプロット
+yyaxis right
+plot(1:12,count,'o')
+ax=gca;
+ax.YScale='log';
+ylabel('データ数 [個] (片対数スケール)')
+
+%% 保存
+% savefig([saveDirName,'boxplot'])
+% xlswrite([saveDirName,'absdiff'],absdiffMat);
+% xlswrite([saveDirName,'std'],stdMat);
+
+
+
+%% kinect
+sens=[];
+est=[];
+stdMat=[];
+absdiffMat=[];
+
+for personid=1:8
+    for num=1:5
+        kinectDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\30deg\Kinect\';
+        sensorDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\data\30deg\MotionSensor\';
+        saveDirName='C:\Users\exp1\Documents\MATLAB\HeadPoseEstimation\result\30deg\Kinect\';
+        
+        personName=num2str(personid);
+        numName=num2str(num);
+        
+        sensorFileName=[sensorDirName,personName,'\',numName,'_sens_yaws.mat'];
+        kinectFileName=[kinectDirName,personName,'\',numName,'_kinect_yaws.mat'];
+        
+        load(sensorFileName);
+        load(kinectFileName);
+        
+        m=numel(kinect_yaws);        
+        kinect_yaws=-kinect_yaws;
+        sens_yaws = interp1(1:300,sens_yaws,1:300/m:300)';
+        
+        sens=[sens;sens_yaws];
+        est=[est;yaws];
+        
+        absdiffMat(personid,num)=nanmean(abs(yaws-sens_yaws));
+        stdMat(personid,num)=nanstd(abs(yaws-sens_yaws));
+    end
+end
+
+error=abs(sens-est);
+groupId=zeros(size(error));
+
+groupId(sens<-25)=1;
+groupId(-25<=sens&sens<-20)=2;
+groupId(-20<=sens&sens<-15)=3;
+groupId(-15<=sens&sens<-10)=4;
+groupId(-10<=sens&sens<-5)=5;
+groupId(-5<=sens&sens<0)=6;
+groupId(0<=sens&sens<5)=7;
+groupId(5<=sens&sens<10)=8;
+groupId(10<=sens&sens<15)=9;
+groupId(15<=sens&sens<20)=10;
+groupId(20<=sens&sens<25)=11;
+groupId(25<=sens)=12;
+
+count(1)=sum(groupId==1);
+count(2)=sum(groupId==2);
+count(3)=sum(groupId==3);
+count(4)=sum(groupId==4);
+count(5)=sum(groupId==5);
+count(6)=sum(groupId==6);
+count(7)=sum(groupId==7);
+count(8)=sum(groupId==8);
+count(9)=sum(groupId==9);
+count(10)=sum(groupId==10);
+count(11)=sum(groupId==11);
+count(12)=sum(groupId==12);
+
+% 箱ひげ図をプロット
+    boxplot(error,groupId)
+    xlabel('グループ番号')
+    ylabel('絶対誤差 [deg]')
+    grid on    
+    hold on
+    
+    % データ数をプロット
+yyaxis right
+plot(1:12,count,'o')
+ax=gca;
+ax.YScale='log';
+ylabel('データ数 [個] (片対数スケール)')
+
+%% 保存
+% savefig([saveDirName,'boxplot'])
+% xlswrite([saveDirName,'absdiff'],absdiffMat);
+% xlswrite([saveDirName,'std'],stdMat);
+

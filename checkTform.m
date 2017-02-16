@@ -13,9 +13,14 @@ function [ tform,pitch,yaw,roll ] = checkTform( tform,prevTform )
 %   pitch : ピッチ角
 %   yaw : ヨー角
 %   roll : ロール角
+%   x : x座標変化
+%   y : y座標変化
+%   z : z座標変化
 
 
 R=tform.T(1:3,1:3)';
+T=tform.T(4,1:3)';
+
 prevR=prevTform.T(1:3,1:3)';
 
 [pitch,yaw,roll]=R2Deg(R);

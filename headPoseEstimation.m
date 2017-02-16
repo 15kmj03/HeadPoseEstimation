@@ -1,4 +1,4 @@
-function [ pitches,yaws,rolls ] = headPoseEstimation( filename )
+function [ pitches,yaws,rolls,Xs,Ys,Zs ] = headPoseEstimation( filename )
 %HEADPOSEESTIMATION “ª•”Žp¨•Ï‰»„’è‚ðs‚¤
 %
 %   [ pitches,yaws,rolls ] = headPoseEstimation( filename )
@@ -10,6 +10,9 @@ function [ pitches,yaws,rolls ] = headPoseEstimation( filename )
 % pitches : ƒsƒbƒ`Šp•Ï‰»
 % yaws : ƒˆ[Šp•Ï‰»
 % rolls : ƒ[ƒ‹Šp•Ï‰»
+% Xs : XÀ•W•Ï‰»
+% Ys : YÀ•W•Ï‰»
+% Zs : ZÀ•W•Ï‰»
 %
 %
 % mexopencv‚ÌŠÖ”‚ð—˜—p‚·‚é
@@ -36,9 +39,6 @@ function [ pitches,yaws,rolls ] = headPoseEstimation( filename )
 
 frameIdx=0;
 prevBbox=[];
-pitches=zeros(301,1);
-yaws=zeros(301,1);
-rolls=zeros(301,1);
 
 % “®‰æ“Ç‚Ýž‚Ý
 videoFileReader=vision.VideoFileReader(filename,...
@@ -127,7 +127,9 @@ end
 
 % Šç‚Æ”wŒi‚Ì•ª—£
 xyzPoints=refineXyzPoints(xyzPoints);
-% xyzPoints = refine(xyzPoints);
+x0=mean(xyzPoints(:,1));
+y0=mean(xyzPoints(:,2));
+z0=mean(xyzPoints(:,3));
 
 % ptCloud‚Ìì¬
 % ƒˆ[‚ª0“x‚Ì‚Æ‚«‚ÌptCloud‚ðface0‚Æ‚µ‚Ä•Û‘¶
@@ -220,11 +222,11 @@ while 1
     
     %% ptCloud‚Ìì¬
     ptCloud=pointCloud(xyzPoints);
-    pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
-    xlabel('X [mm]')
-    ylabel('Y [mm]')
-    zlabel('Z [mm]')
-    drawnow;
+%     pcshow(ptCloud, 'VerticalAxis', 'Y', 'VerticalAxisDir', 'Down')
+%     xlabel('X [mm]')
+%     ylabel('Y [mm]')
+%     zlabel('Z [mm]')
+%     drawnow;
     
     %% registration
     mergeSize = 3;
@@ -244,6 +246,14 @@ while 1
     pitches(frameIdx) = pitch;
     yaws(frameIdx) = yaw;
     rolls(frameIdx) = roll;
+    
+    x=mean(xyzPoints(:,1));
+    y=mean(xyzPoints(:,2));
+    z=mean(xyzPoints(:,3));
+    
+    Xs(frameIdx)=x0-x;
+    Ys(frameIdx)=y0-y;
+    Zs(frameIdx)=z0-z;
 
     % Šî€Šç“_ŒQ‚ÌXV
     if yaw > maxYaw
